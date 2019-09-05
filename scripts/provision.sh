@@ -565,11 +565,11 @@ cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
       "app_key"                       : "",
       "app_log_level"                 : "debug",
       "app_mode"                      : "api+web",
-      "app_url"                       : "http://admin.mc24.loc",
+      "app_url"                       : "http://admin.mc24",
       "broadcast_driver"              : "log",
       "cache_driver"                  : "file",
-      "cors_allow_origin_director"    : "http://director.mc24.loc",
-      "cors_allow_origin_doctor"      : "http://doctor.mc24.loc",
+      "cors_allow_origin_director"    : "http://director.mc24",
+      "cors_allow_origin_doctor"      : "http://doctor.mc24",
       "customer_name"                 : "MedCenter24",
       "db_connection"                 : "mysql",
       "db_database"                   : "homestead",
@@ -603,9 +603,9 @@ cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
     },
     "director-gui": {
       "development": {
-        "apiHost": "http://api.mc24.loc",
+        "apiHost": "http://api.mc24",
         "projectName": "Medical Center 24 Development",
-        "doctorLink": "http://doctor.mc24.loc"
+        "doctorLink": "http://doctor.mc24"
       },
       "production": {
         "apiHost": "https://api.medcenter24.com",
@@ -615,7 +615,7 @@ cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
     },
     "doctor-gui": {
       "development": {
-        "apiHost": "http://api.mc24.loc"
+        "apiHost": "http://api.mc24"
       },
       "production": {
         "apiHost": "https://api.medcenter24.com"
@@ -632,11 +632,11 @@ echo " ===> Init nginx <=== "
 cd /etc/nginx/sites-enabled || exit
 
 echo "Admin nginx"
-touch backoffice.mc24.loc.nginx.conf
-sudo tee /etc/nginx/sites-enabled/backoffice.mc24.loc.nginx.conf <<EOL
+touch backoffice.mc24.nginx.conf
+sudo tee /etc/nginx/sites-enabled/backoffice.mc24.nginx.conf <<EOL
 server {
   listen 80;
-  server_name backoffice.mc24.loc;
+  server_name backoffice.mc24;
 
   root /var/www/mc24/mcCore/public;
 
@@ -656,7 +656,7 @@ server {
     try_files \$uri \$uri/ /index.php?\$query_string;
   }
   access_log off;
-  error_log /var/log/nginx/backoffice.mc24.loc-error.log error;
+  error_log /var/log/nginx/backoffice.mc24-error.log error;
 
   error_page 404 /index.php;
 
@@ -670,11 +670,11 @@ server {
 EOL
 
 echo "API nginx"
-touch api.mc24.loc.nginx.conf
-sudo tee /etc/nginx/sites-enabled/api.mc24.loc.nginx.conf <<EOL
+touch api.mc24.nginx.conf
+sudo tee /etc/nginx/sites-enabled/api.mc24.nginx.conf <<EOL
 server {
   listen 80;
-  server_name api.mc24.loc;
+  server_name api.mc24;
 
   root /var/www/mc24/mcCore/public;
 
@@ -694,7 +694,7 @@ server {
     try_files \$uri \$uri/ /index.php?\$query_string;
   }
   access_log off;
-  error_log /var/log/nginx/api.mc24.loc-error.log error;
+  error_log /var/log/nginx/api.mc24-error.log error;
 
   error_page 404 /index.php;
 
@@ -708,11 +708,11 @@ server {
 EOL
 
 echo "Doctor nginx"
-touch doctor.mc24.loc.nginx.conf
-sudo tee /etc/nginx/sites-enabled/doctor.mc24.loc.nginx.conf <<EOL
+touch doctor.mc24.nginx.conf
+sudo tee /etc/nginx/sites-enabled/doctor.mc24.nginx.conf <<EOL
 server {
   listen 80;
-  server_name doctor.mc24.loc;
+  server_name doctor.mc24;
 
   root /var/www/mc24/guiDoctor/dist;
 
@@ -730,11 +730,11 @@ server {
 EOL
 
 echo "Director nginx"
-touch director.mc24.loc.nginx.conf
-sudo tee /etc/nginx/sites-enabled/director.mc24.loc.nginx.conf <<EOL
+touch director.mc24.nginx.conf
+sudo tee /etc/nginx/sites-enabled/director.mc24.nginx.conf <<EOL
 server {
   listen 80;
-  server_name director.mc24.loc;
+  server_name director.mc24;
 
   root /var/www/mc24/guiDirector/dist;
 
