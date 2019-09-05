@@ -1,0 +1,757 @@
+#!/usr/bin/env bash
+
+export DEBIAN_FRONTEND=noninteractive
+
+# Update Package List
+apt-get update
+
+# Update System Packages
+apt-get upgrade -y
+
+# Force Locale
+echo "LC_ALL=en_US.UTF-8" >> /etc/default/locale
+locale-gen en_US.UTF-8
+
+# Install Some PPAs
+apt-get install -y software-properties-common curl
+
+apt-add-repository ppa:nginx/development -y
+apt-add-repository ppa:ondrej/php -y
+
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+
+sudo tee /etc/apt/sources.list.d/pgdg.list <<END
+deb http://apt.postgresql.org/pub/repos/apt/ bionic-pgdg main
+END
+
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+
+# Update Package Lists
+apt-get update
+
+# Install Some Basic Packages
+apt-get install -y build-essential dos2unix gcc git libmcrypt4 libpcre3-dev libpng-dev ntp unzip make python2.7-dev \
+python-pip re2c supervisor unattended-upgrades whois vim libnotify-bin pv cifs-utils mcrypt bash-completion zsh \
+graphviz avahi-daemon tshark imagemagick
+
+# Set My Timezone
+ln -sf /usr/share/zoneinfo/UTC /etc/localtime
+
+# Install PHP Stuffs
+# Current PHP
+apt-get install -y --allow-change-held-packages \
+php7.3-cli php7.3-bcmath php7.3-curl php7.3-dev php7.3-gd php7.3-imap php7.3-intl  php7.3-json  php7.3-ldap \
+php7.3-mbstring php7.3-mysql php7.3-odbc php7.3-pgsql php7.3-phpdbg php7.3-pspell php7.3-soap php7.3-sqlite3 \
+php7.3-xml php7.3-zip php7.3-readline php-memcached php-xdebug php-pear php-imagick php-redis
+
+# PHP 7.2
+apt-get install -y --allow-change-held-packages \
+php7.2-cli php7.2-bcmath php7.2-curl php7.2-dev php7.2-gd php7.2-imap php7.2-intl  php7.2-json  php7.2-ldap \
+php7.2-mbstring php7.2-mysql php7.2-odbc php7.2-pgsql php7.2-phpdbg php7.2-pspell php7.2-soap php7.2-sqlite3 \
+php7.2-xml php7.2-zip php7.2-readline
+
+# PHP 7.1
+apt-get install -y --allow-change-held-packages \
+php7.1-cli php7.1-bcmath php7.1-curl php7.1-dev php7.1-gd php7.1-imap php7.1-intl  php7.1-json  php7.1-ldap \
+php7.1-mbstring php7.1-mysql php7.1-odbc php7.1-pgsql php7.1-phpdbg php7.1-pspell php7.1-soap php7.1-sqlite3 \
+php7.1-xml php7.1-zip php7.1-readline php7.1-mcrypt
+
+# PHP 7.0
+apt-get install -y --allow-change-held-packages \
+php7.0-cli php7.0-bcmath php7.0-curl php7.0-dev php7.0-gd php7.0-imap php7.0-intl  php7.0-json  php7.0-ldap \
+php7.0-mbstring php7.0-mysql php7.0-odbc php7.0-pgsql php7.0-phpdbg php7.0-pspell php7.0-soap php7.0-sqlite3 \
+php7.0-xml php7.0-zip php7.0-readline php7.0-mcrypt
+
+# PHP 5.6
+apt-get install -y --allow-change-held-packages \
+php5.6-cli php5.6-bcmath php5.6-curl php5.6-dev php5.6-gd php5.6-imap php5.6-intl  php5.6-json  php5.6-ldap \
+php5.6-mbstring php5.6-mysql php5.6-odbc php5.6-pgsql php5.6-phpdbg php5.6-pspell php5.6-soap php5.6-sqlite3 \
+php5.6-xml php5.6-zip php5.6-readline php5.6-mcrypt
+
+update-alternatives --set php /usr/bin/php7.3
+update-alternatives --set php-config /usr/bin/php-config7.3
+update-alternatives --set phpize /usr/bin/phpize7.3
+
+# Install Composer
+curl -sS https://getcomposer.org/installer | php
+mv composer.phar /usr/local/bin/composer
+
+# Install Laravel Envoy, Installer, and prestissimo for parallel downloads
+# sudo su vagrant <<'EOF'
+# /usr/local/bin/composer global require hirak/prestissimo
+# /usr/local/bin/composer global require "medcenter24/deploy-demo=~0.0.1"
+# EOF
+
+# Set Some PHP CLI Settings
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/cli/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/cli/php.ini
+sudo sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/cli/php.ini
+sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/cli/php.ini
+
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.3/cli/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.3/cli/php.ini
+sudo sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.3/cli/php.ini
+sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.3/cli/php.ini
+
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.1/cli/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.1/cli/php.ini
+sudo sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.1/cli/php.ini
+sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.1/cli/php.ini
+
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.0/cli/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.0/cli/php.ini
+sudo sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.0/cli/php.ini
+sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.0/cli/php.ini
+
+sudo sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/5.6/cli/php.ini
+sudo sed -i "s/display_errors = .*/display_errors = On/" /etc/php/5.6/cli/php.ini
+sudo sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/5.6/cli/php.ini
+sudo sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/5.6/cli/php.ini
+
+# Install Nginx & PHP-FPM
+apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages \
+nginx php7.1-fpm php7.3-fpm php7.2-fpm php7.0-fpm php5.6-fpm
+
+rm /etc/nginx/sites-enabled/default
+rm /etc/nginx/sites-available/default
+
+# Create a configuration file for Nginx overrides.
+sudo mkdir -p /home/vagrant/.config/nginx
+sudo chown -R vagrant:vagrant /home/vagrant
+touch /home/vagrant/.config/nginx/nginx.conf
+sudo ln -sf /home/vagrant/.config/nginx/nginx.conf /etc/nginx/conf.d/nginx.conf
+
+# Setup Some PHP-FPM Options
+echo "xdebug.remote_enable = 1" >> /etc/php/7.3/mods-available/xdebug.ini
+echo "xdebug.remote_connect_back = 1" >> /etc/php/7.3/mods-available/xdebug.ini
+echo "xdebug.remote_port = 9000" >> /etc/php/7.3/mods-available/xdebug.ini
+echo "xdebug.max_nesting_level = 512" >> /etc/php/7.3/mods-available/xdebug.ini
+echo "opcache.revalidate_freq = 0" >> /etc/php/7.3/mods-available/opcache.ini
+
+echo "xdebug.remote_enable = 1" >> /etc/php/7.2/mods-available/xdebug.ini
+echo "xdebug.remote_connect_back = 1" >> /etc/php/7.2/mods-available/xdebug.ini
+echo "xdebug.remote_port = 9000" >> /etc/php/7.2/mods-available/xdebug.ini
+echo "xdebug.max_nesting_level = 512" >> /etc/php/7.2/mods-available/xdebug.ini
+echo "opcache.revalidate_freq = 0" >> /etc/php/7.2/mods-available/opcache.ini
+
+echo "xdebug.remote_enable = 1" >> /etc/php/7.1/mods-available/xdebug.ini
+echo "xdebug.remote_connect_back = 1" >> /etc/php/7.1/mods-available/xdebug.ini
+echo "xdebug.remote_port = 9000" >> /etc/php/7.1/mods-available/xdebug.ini
+echo "xdebug.max_nesting_level = 512" >> /etc/php/7.1/mods-available/xdebug.ini
+echo "opcache.revalidate_freq = 0" >> /etc/php/7.1/mods-available/opcache.ini
+
+echo "xdebug.remote_enable = 1" >> /etc/php/7.0/mods-available/xdebug.ini
+echo "xdebug.remote_connect_back = 1" >> /etc/php/7.0/mods-available/xdebug.ini
+echo "xdebug.remote_port = 9000" >> /etc/php/7.0/mods-available/xdebug.ini
+echo "xdebug.max_nesting_level = 512" >> /etc/php/7.0/mods-available/xdebug.ini
+echo "opcache.revalidate_freq = 0" >> /etc/php/7.0/mods-available/opcache.ini
+
+echo "xdebug.remote_enable = 1" >> /etc/php/5.6/mods-available/xdebug.ini
+echo "xdebug.remote_connect_back = 1" >> /etc/php/5.6/mods-available/xdebug.ini
+echo "xdebug.remote_port = 9000" >> /etc/php/5.6/mods-available/xdebug.ini
+echo "xdebug.max_nesting_level = 512" >> /etc/php/5.6/mods-available/xdebug.ini
+echo "opcache.revalidate_freq = 0" >> /etc/php/5.6/mods-available/opcache.ini
+
+sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.3/fpm/php.ini
+sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.3/fpm/php.ini
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.3/fpm/php.ini
+sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.3/fpm/php.ini
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.3/fpm/php.ini
+sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.3/fpm/php.ini
+sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.3/fpm/php.ini
+
+printf "[openssl]\n" | tee -a /etc/php/7.3/fpm/php.ini
+printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.3/fpm/php.ini
+
+printf "[curl]\n" | tee -a /etc/php/7.3/fpm/php.ini
+printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.3/fpm/php.ini
+
+sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.2/fpm/php.ini
+sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.2/fpm/php.ini
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.2/fpm/php.ini
+sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.2/fpm/php.ini
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.2/fpm/php.ini
+sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.2/fpm/php.ini
+sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.2/fpm/php.ini
+
+printf "[openssl]\n" | tee -a /etc/php/7.2/fpm/php.ini
+printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+
+printf "[curl]\n" | tee -a /etc/php/7.2/fpm/php.ini
+printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.2/fpm/php.ini
+
+sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.1/fpm/php.ini
+sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.1/fpm/php.ini
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.1/fpm/php.ini
+sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.1/fpm/php.ini
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.1/fpm/php.ini
+sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.1/fpm/php.ini
+sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.1/fpm/php.ini
+
+printf "[openssl]\n" | tee -a /etc/php/7.1/fpm/php.ini
+printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.1/fpm/php.ini
+
+printf "[curl]\n" | tee -a /etc/php/7.1/fpm/php.ini
+printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.1/fpm/php.ini
+
+sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/7.0/fpm/php.ini
+sed -i "s/display_errors = .*/display_errors = On/" /etc/php/7.0/fpm/php.ini
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/7.0/fpm/php.ini
+sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/7.0/fpm/php.ini
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/7.0/fpm/php.ini
+sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/7.0/fpm/php.ini
+sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/7.0/fpm/php.ini
+
+printf "[openssl]\n" | tee -a /etc/php/7.0/fpm/php.ini
+printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.0/fpm/php.ini
+
+printf "[curl]\n" | tee -a /etc/php/7.0/fpm/php.ini
+printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/7.0/fpm/php.ini
+
+sed -i "s/error_reporting = .*/error_reporting = E_ALL/" /etc/php/5.6/fpm/php.ini
+sed -i "s/display_errors = .*/display_errors = On/" /etc/php/5.6/fpm/php.ini
+sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php/5.6/fpm/php.ini
+sed -i "s/memory_limit = .*/memory_limit = 512M/" /etc/php/5.6/fpm/php.ini
+sed -i "s/upload_max_filesize = .*/upload_max_filesize = 100M/" /etc/php/5.6/fpm/php.ini
+sed -i "s/post_max_size = .*/post_max_size = 100M/" /etc/php/5.6/fpm/php.ini
+sed -i "s/;date.timezone.*/date.timezone = UTC/" /etc/php/5.6/fpm/php.ini
+
+printf "[openssl]\n" | tee -a /etc/php/5.6/fpm/php.ini
+printf "openssl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/5.6/fpm/php.ini
+
+printf "[curl]\n" | tee -a /etc/php/5.6/fpm/php.ini
+printf "curl.cainfo = /etc/ssl/certs/ca-certificates.crt\n" | tee -a /etc/php/5.6/fpm/php.ini
+
+# Disable XDebug On The CLI
+sudo phpdismod -s cli xdebug
+
+# Copy fastcgi_params to Nginx because they broke it on the PPA
+cat > /etc/nginx/fastcgi_params << EOF
+fastcgi_param	QUERY_STRING		\$query_string;
+fastcgi_param	REQUEST_METHOD		\$request_method;
+fastcgi_param	CONTENT_TYPE		\$content_type;
+fastcgi_param	CONTENT_LENGTH		\$content_length;
+fastcgi_param	SCRIPT_FILENAME		\$request_filename;
+fastcgi_param	SCRIPT_NAME		\$fastcgi_script_name;
+fastcgi_param	REQUEST_URI		\$request_uri;
+fastcgi_param	DOCUMENT_URI		\$document_uri;
+fastcgi_param	DOCUMENT_ROOT		\$document_root;
+fastcgi_param	SERVER_PROTOCOL		\$server_protocol;
+fastcgi_param	GATEWAY_INTERFACE	CGI/1.1;
+fastcgi_param	SERVER_SOFTWARE		nginx/\$nginx_version;
+fastcgi_param	REMOTE_ADDR		\$remote_addr;
+fastcgi_param	REMOTE_PORT		\$remote_port;
+fastcgi_param	SERVER_ADDR		\$server_addr;
+fastcgi_param	SERVER_PORT		\$server_port;
+fastcgi_param	SERVER_NAME		\$server_name;
+fastcgi_param	HTTPS			\$https if_not_empty;
+fastcgi_param	REDIRECT_STATUS		200;
+EOF
+
+# Set The Nginx & PHP-FPM User
+sed -i "s/user www-data;/user vagrant;/" /etc/nginx/nginx.conf
+sed -i "s/# server_names_hash_bucket_size.*/server_names_hash_bucket_size 64;/" /etc/nginx/nginx.conf
+
+sed -i "s/user = www-data/user = vagrant/" /etc/php/7.3/fpm/pool.d/www.conf
+sed -i "s/group = www-data/group = vagrant/" /etc/php/7.3/fpm/pool.d/www.conf
+
+sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/7.3/fpm/pool.d/www.conf
+sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/7.3/fpm/pool.d/www.conf
+sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.3/fpm/pool.d/www.conf
+
+sed -i "s/user = www-data/user = vagrant/" /etc/php/7.2/fpm/pool.d/www.conf
+sed -i "s/group = www-data/group = vagrant/" /etc/php/7.2/fpm/pool.d/www.conf
+
+sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/7.2/fpm/pool.d/www.conf
+sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/7.2/fpm/pool.d/www.conf
+sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.2/fpm/pool.d/www.conf
+
+sed -i "s/user = www-data/user = vagrant/" /etc/php/7.1/fpm/pool.d/www.conf
+sed -i "s/group = www-data/group = vagrant/" /etc/php/7.1/fpm/pool.d/www.conf
+
+sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/7.1/fpm/pool.d/www.conf
+sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/7.1/fpm/pool.d/www.conf
+sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.1/fpm/pool.d/www.conf
+
+sed -i "s/user = www-data/user = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
+sed -i "s/group = www-data/group = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
+
+sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
+sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/7.0/fpm/pool.d/www.conf
+sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/7.0/fpm/pool.d/www.conf
+
+sed -i "s/user = www-data/user = vagrant/" /etc/php/5.6/fpm/pool.d/www.conf
+sed -i "s/group = www-data/group = vagrant/" /etc/php/5.6/fpm/pool.d/www.conf
+
+sed -i "s/listen\.owner.*/listen.owner = vagrant/" /etc/php/5.6/fpm/pool.d/www.conf
+sed -i "s/listen\.group.*/listen.group = vagrant/" /etc/php/5.6/fpm/pool.d/www.conf
+sed -i "s/;listen\.mode.*/listen.mode = 0666/" /etc/php/5.6/fpm/pool.d/www.conf
+
+service nginx restart
+service php7.2-fpm restart
+service php7.3-fpm restart
+service php7.1-fpm restart
+service php7.0-fpm restart
+service php5.6-fpm restart
+
+# Add Vagrant User To WWW-Data
+usermod -a -G www-data vagrant
+id vagrant
+groups vagrant
+
+# Install Node
+apt-get install -y nodejs
+/usr/bin/npm install -g npm
+/usr/bin/npm install -g gulp-cli
+/usr/bin/npm install -g bower
+/usr/bin/npm install -g yarn
+/usr/bin/npm install -g grunt-cli
+
+# Install SQLite
+apt-get install -y sqlite3 libsqlite3-dev
+
+# Install MySQL
+echo "mysql-server mysql-server/root_password password secret" | debconf-set-selections
+echo "mysql-server mysql-server/root_password_again password secret" | debconf-set-selections
+apt-get install -y mysql-server
+
+# Install LMM for database snapshots
+apt-get install -y thin-provisioning-tools bc
+git clone -b ubuntu-18.04 https://github.com/Lullabot/lmm.git /opt/lmm
+sed -e 's/vagrant-vg/homestead-vg/' -i /opt/lmm/config.sh
+ln -s /opt/lmm/lmm /usr/local/sbin/lmm
+
+# Create a thinly provisioned volume to move the database to. We use 40G as the
+# size leaving ~5GB free for other volumes.
+mkdir -p /homestead-vg/master
+sudo lvs
+lvcreate -L 40G -T homestead-vg/thinpool
+
+# Create a 10GB volume for the database. If needed, it can be expanded with
+# lvextend.
+lvcreate -V10G -T homestead-vg/thinpool -n mysql-master
+mkfs.ext4 /dev/homestead-vg/mysql-master
+echo "/dev/homestead-vg/mysql-master\t/homestead-vg/master\text4\terrors=remount-ro\t0\t1" >> /etc/fstab
+mount -a
+chown mysql:mysql /homestead-vg/master
+
+# Move the data directory and symlink it in.
+systemctl stop mysql
+mv /var/lib/mysql/* /homestead-vg/master
+rm -rf /var/lib/mysql
+ln -s /homestead-vg/master /var/lib/mysql
+
+# Allow mysqld to access the new data directories.
+echo '/homestead-vg/ r,' >> /etc/apparmor.d/local/usr.sbin.mysqld
+echo '/homestead-vg/** rwk,' >> /etc/apparmor.d/local/usr.sbin.mysqld
+systemctl restart apparmor
+systemctl start mysql
+
+# Configure MySQL Password Lifetime
+echo "default_password_lifetime = 0" >> /etc/mysql/mysql.conf.d/mysqld.cnf
+
+# Configure MySQL Remote Access
+sed -i '/^bind-address/s/bind-address.*=.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf
+
+mysql --user="root" --password="secret" -e "GRANT ALL ON *.* TO root@'0.0.0.0' IDENTIFIED BY 'secret' WITH GRANT OPTION;"
+service mysql restart
+
+mysql --user="root" --password="secret" -e "CREATE USER 'homestead'@'0.0.0.0' IDENTIFIED BY 'secret';"
+mysql --user="root" --password="secret" -e "GRANT ALL ON *.* TO 'homestead'@'0.0.0.0' IDENTIFIED BY 'secret' WITH GRANT OPTION;"
+mysql --user="root" --password="secret" -e "GRANT ALL ON *.* TO 'homestead'@'%' IDENTIFIED BY 'secret' WITH GRANT OPTION;"
+mysql --user="root" --password="secret" -e "FLUSH PRIVILEGES;"
+mysql --user="root" --password="secret" -e "CREATE DATABASE homestead character set UTF8mb4 collate utf8mb4_bin;"
+
+sudo tee /home/vagrant/.my.cnf <<EOL
+[mysqld]
+character-set-server=utf8mb4
+collation-server=utf8mb4_bin
+EOL
+
+# Add Timezone Support To MySQL
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql --user=root --password=secret mysql
+service mysql restart
+
+# Install Postgres
+apt-get install -y postgresql-11 postgresql-server-dev-11
+
+# Configure Postgres Remote Access
+
+sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/g" /etc/postgresql/11/main/postgresql.conf
+echo "host    all             all             10.0.2.2/32               md5" | tee -a /etc/postgresql/11/main/pg_hba.conf
+sudo -u postgres psql -c "CREATE ROLE homestead LOGIN PASSWORD 'secret' SUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;"
+sudo -u postgres /usr/bin/createdb --echo --owner=homestead homestead
+service postgresql restart
+
+# Install Memcached & Beanstalk
+apt-get install -y redis-server memcached beanstalkd
+
+# Configure Beanstalkd
+sed -i "s/#START=yes/START=yes/" /etc/default/beanstalkd
+/etc/init.d/beanstalkd start
+
+# Install & Configure MailHog
+wget --quiet -O /usr/local/bin/mailhog https://github.com/mailhog/MailHog/releases/download/v0.2.1/MailHog_linux_amd64
+chmod +x /usr/local/bin/mailhog
+
+sudo tee /etc/systemd/system/mailhog.service <<EOL
+[Unit]
+Description=Mailhog
+After=network.target
+[Service]
+User=vagrant
+ExecStart=/usr/bin/env /usr/local/bin/mailhog > /dev/null 2>&1 &
+[Install]
+WantedBy=multi-user.target
+EOL
+
+systemctl daemon-reload
+systemctl enable mailhog
+
+# Configure Supervisor
+systemctl enable supervisor.service
+service supervisor start
+
+# Install Heroku CLI
+curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+
+# Install ngrok
+wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
+unzip ngrok-stable-linux-amd64.zip -d /usr/local/bin
+rm -rf ngrok-stable-linux-amd64.zip
+
+# Install Flyway
+wget https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/4.2.0/flyway-commandline-4.2.0-linux-x64.tar.gz
+tar -zxvf flyway-commandline-4.2.0-linux-x64.tar.gz -C /usr/local
+chmod +x /usr/local/flyway-4.2.0/flyway
+ln -s /usr/local/flyway-4.2.0/flyway /usr/local/bin/flyway
+rm -rf flyway-commandline-4.2.0-linux-x64.tar.gz
+
+# Install wp-cli
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
+
+# Install Drush Launcher.
+curl --silent --location https://github.com/drush-ops/drush-launcher/releases/download/0.6.0/drush.phar --output drush.phar
+chmod +x drush.phar
+mv drush.phar /usr/local/bin/drush
+drush self-update
+
+# Install Drupal Console Launcher.
+curl --silent --location https://drupalconsole.com/installer --output drupal.phar
+chmod +x drupal.phar
+mv drupal.phar /usr/local/bin/drupal
+
+# Install & Configure Postfix
+echo "postfix postfix/mailname string homestead.test" | debconf-set-selections
+echo "postfix postfix/main_mailer_type string 'Internet Site'" | debconf-set-selections
+apt-get install -y postfix
+sed -i "s/relayhost =/relayhost = [localhost]:1025/g" /etc/postfix/main.cf
+/etc/init.d/postfix reload
+
+# Update / Override motd
+sed -i "s/motd.ubuntu.com/homestead.joeferguson.me/g" /etc/default/motd-news
+rm -rf /etc/update-motd.d/10-help-text
+rm -rf /etc/update-motd.d/50-landscape-sysinfo
+service motd-news restart
+
+# One last upgrade check
+apt-get upgrade -y
+
+# Clean Up
+apt -y autoremove
+apt -y clean
+chown -R vagrant:vagrant /home/vagrant
+chown -R vagrant:vagrant /usr/local/bin
+
+# Add Composer Global Bin To Path
+printf "\nPATH=\"$(sudo su - vagrant -c 'composer config -g home 2>/dev/null')/vendor/bin:\$PATH\"\n" | tee -a /home/vagrant/.profile
+
+# Perform some cleanup from chef/bento packer_templates/ubuntu/scripts/cleanup.sh
+# Delete Linux source
+dpkg --list \
+    | awk '{ print $2 }' \
+    | grep linux-source \
+    | xargs apt-get -y purge;
+
+# delete docs packages
+dpkg --list \
+    | awk '{ print $2 }' \
+    | grep -- '-doc$' \
+    | xargs apt-get -y purge;
+
+# Delete obsolete networking
+apt-get -y purge ppp pppconfig pppoeconf
+
+# Delete oddities
+apt-get -y purge popularity-contest installation-report command-not-found command-not-found-data friendly-recovery \
+fonts-ubuntu-font-family-console laptop-detect
+
+# Exlude the files we don't need w/o uninstalling linux-firmware
+echo "==> Setup dpkg excludes for linux-firmware"
+cat <<_EOF_ | cat >> /etc/dpkg/dpkg.cfg.d/excludes
+#BENTO-BEGIN
+path-exclude=/lib/firmware/*
+path-exclude=/usr/share/doc/linux-firmware/*
+#BENTO-END
+_EOF_
+
+# Delete the massive firmware packages
+rm -rf /lib/firmware/*
+rm -rf /usr/share/doc/linux-firmware/*
+
+apt-get -y autoremove;
+apt-get -y clean;
+
+# Remove docs
+rm -rf /usr/share/doc/*
+
+# Remove caches
+find /var/cache -type f -exec rm -rf {} \;
+
+# delete any logs that have built up during the install
+find /var/log/ -name *.log -exec rm -f {} \;
+
+# Blank netplan machine-id (DUID) so machines get unique ID generated on boot.
+truncate -s 0 /etc/machine-id
+
+# Enable Swap Memory
+/bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+/sbin/mkswap /var/swap.1
+/sbin/swapon /var/swap.1
+
+
+echo " ====> MedCenter24 <==== " | debconf-set-selections
+
+echo "Init Mc24"
+cd /var/www || exit
+mkdir mc24
+sudo chown www-data:www-data -R mc24
+cd mc24 || exit
+sudo -u www-data git clone https://github.com/medcenter24/deploy-demo.git .
+sudo -u www-data composer install --prefer-source
+
+echo "Install application from the seed file"
+sudo -u www-data touch /var/www/mc24/mcCore/demoSeed.json
+cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
+{
+  "seed": {
+    "identifier": "development",
+    "author": "MedCenter24",
+    "version": "0.1"
+  },
+  "admin": {
+    "email": "admin@example.com",
+    "password": "secret",
+    "name": "Admin"
+  },
+  "configurations": {
+    "global": {
+      "config-path": "../config",
+      "config-filename": "generis.conf.php",
+      "env-filename": ".env",
+      "data-path": "../data"
+    },
+    "core": {
+      "api_debug"                     : "true",
+      "app_debug"                     : "true",
+      "api_name"                      : "MedCenter 24 API",
+      "api_prefix"                    : "api",
+      "api_strict"                    : "",
+      "api_subtype"                   : "MC24",
+      "api_version"                   : "v1",
+      "app_env"                       : "local",
+      "app_key"                       : "",
+      "app_log_level"                 : "debug",
+      "app_mode"                      : "api+web",
+      "app_url"                       : "http://admin.mc24.loc",
+      "broadcast_driver"              : "log",
+      "cache_driver"                  : "file",
+      "cors_allow_origin_director"    : "http://director.mc24.loc",
+      "cors_allow_origin_doctor"      : "http://doctor.mc24.loc",
+      "customer_name"                 : "MedCenter24",
+      "db_connection"                 : "mysql",
+      "db_database"                   : "homestead",
+      "db_host"                       : "localhost",
+      "db_port"                       : "3306",
+      "db_username"                   : "homestead",
+      "db_password"                   : "secret",
+      "debugbar_enabled"              : "false",
+      "dropbox_backup_app"            : "",
+      "dropbox_backup_key"            : "",
+      "dropbox_backup_root"           : "",
+      "dropbox_backup_secret"         : "",
+      "dropbox_backup_token"          : "",
+      "image_driver"                  : "imagick",
+      "mail_driver"                   : "smtp",
+      "mail_encryption"               : "",
+      "mail_host"                     : "",
+      "mail_password"                 : "",
+      "mail_port"                     : "2525",
+      "mail_username"                 : "",
+      "pusher_app_id"                 : "",
+      "pusher_app_key"                : "",
+      "pusher_app_secret"             : "",
+      "queue_driver"                  : "sync",
+      "redis_host"                    : "127.0.0.1",
+      "redis_password"                : "",
+      "redis_port"                    : "6379",
+      "session_driver"                : "file",
+      "log_channel"                   : "single",
+      "slack_webhook_url"             : ""
+    },
+    "director-gui": {
+      "development": {
+        "apiHost": "http://api.mc24.loc",
+        "projectName": "Medical Center 24 Development",
+        "doctorLink": "http://doctor.mc24.loc"
+      },
+      "production": {
+        "apiHost": "https://api.medcenter24.com",
+        "projectName": "Medical Center 24",
+        "doctorLink": "https://doctor.medcenter24.com"
+      }
+    },
+    "doctor-gui": {
+      "development": {
+        "apiHost": "http://api.mc24.loc"
+      },
+      "production": {
+        "apiHost": "https://api.medcenter24.com"
+      }
+    }
+  }
+}
+
+_EOF_
+
+sudo -u www-data php /var/www/mc24/mcCore/artisan setup:seed /var/www/mc24/mcCore/demoSeed.json --force
+
+echo " ===> Init nginx <=== "
+cd /etc/nginx/sites-enabled || exit
+
+echo "Admin nginx"
+touch backoffice.mc24.loc.nginx.conf
+sudo tee /etc/nginx/sites-enabled/backoffice.mc24.loc.nginx.conf <<EOL
+server {
+  listen 80;
+  server_name backoffice.mc24.loc;
+
+  root /var/www/mc24/mcCore/public;
+
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Content-Type-Options "nosniff";
+
+  index index.php;
+
+  charset utf-8;
+
+  location /css {
+
+  }
+
+  location / {
+    try_files \$uri \$uri/ /index.php?\$query_string;
+  }
+  access_log off;
+  error_log /var/log/nginx/backoffice.mc24.loc-error.log error;
+
+  error_page 404 /index.php;
+
+  location ~ \.php {
+    fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+  }
+}
+EOL
+
+echo "API nginx"
+touch api.mc24.loc.nginx.conf
+sudo tee /etc/nginx/sites-enabled/api.mc24.loc.nginx.conf <<EOL
+server {
+  listen 80;
+  server_name api.mc24.loc;
+
+  root /var/www/mc24/mcCore/public;
+
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Content-Type-Options "nosniff";
+
+  index index.php;
+
+  charset utf-8;
+
+  location /css {
+
+  }
+
+  location / {
+    try_files \$uri \$uri/ /index.php?\$query_string;
+  }
+  access_log off;
+  error_log /var/log/nginx/api.mc24.loc-error.log error;
+
+  error_page 404 /index.php;
+
+  location ~ \.php {
+    fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+    fastcgi_index index.php;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+  }
+}
+EOL
+
+echo "Doctor nginx"
+touch doctor.mc24.loc.nginx.conf
+sudo tee /etc/nginx/sites-enabled/doctor.mc24.loc.nginx.conf <<EOL
+server {
+  listen 80;
+  server_name doctor.mc24.loc;
+
+  root /var/www/mc24/guiDoctor/dist;
+
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Content-Type-Options "nosniff";
+
+  charset utf-8;
+  location / {
+  }
+  location ~ /(?!index\.html).+ {
+    try_files \$uri \$uri/ /index.html?\$query_string;
+  }
+}
+EOL
+
+echo "Director nginx"
+touch director.mc24.loc.nginx.conf
+sudo tee /etc/nginx/sites-enabled/director.mc24.loc.nginx.conf <<EOL
+server {
+  listen 80;
+  server_name director.mc24.loc;
+
+  root /var/www/mc24/guiDirector/dist;
+
+  add_header X-Frame-Options "SAMEORIGIN";
+  add_header X-XSS-Protection "1; mode=block";
+  add_header X-Content-Type-Options "nosniff";
+
+  charset utf-8;
+  location / {
+  }
+  location ~ /(?!index\.html).+ {
+    try_files \$uri \$uri/ /index.html?\$query_string;
+  }
+}
+EOL
+
+echo "Restart nginx"
+service nginx restart
+
+echo "MedCenter24 Installed! Congratulations!!!";
