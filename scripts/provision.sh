@@ -525,16 +525,16 @@ truncate -s 0 /etc/machine-id
 echo " ====> MedCenter24 <==== " | debconf-set-selections
 
 echo "Init Mc24"
+sudo chown vagrant -R /var/www
 cd /var/www || exit
-mkdir mc24
-sudo chown www-data:www-data -R mc24
+sudo -u vagrant mkdir mc24
 cd mc24 || exit
-sudo -u www-data git clone https://github.com/medcenter24/deploy-demo.git .
-sudo -u www-data composer install --prefer-source
+sudo -u vagrant git clone https://github.com/medcenter24/deploy-demo.git .
+sudo -u vagrant composer install --prefer-source
 
 echo "Install application from the seed file"
-sudo -u www-data touch /var/www/mc24/mcCore/demoSeed.json
-cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
+sudo -u vagrant touch /var/www/mc24/mcCore/demoSeed.json
+sudo -u vagrant tee /var/www/mc24/mcCore/demoSeed.json <<EOL
 {
   "seed": {
     "identifier": "development",
@@ -624,9 +624,9 @@ cat <<_EOF_ | cat >> /var/www/mc24/mcCore/demoSeed.json
   }
 }
 
-_EOF_
+EOL
 
-sudo -u www-data php /var/www/mc24/mcCore/artisan setup:seed /var/www/mc24/mcCore/demoSeed.json --force
+sudo -u vagrant php /var/www/mc24/mcCore/artisan setup:seed /var/www/mc24/mcCore/demoSeed.json --force
 
 echo " ===> Init nginx <=== "
 cd /etc/nginx/sites-enabled || exit
